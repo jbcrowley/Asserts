@@ -34,6 +34,7 @@ namespace Asserts
             results.Add(Log.assertFalse(true, product, new Validation() { ValidationName = "assertFalse FAIL" }));
             results.Add(Log.assertEquals("test", (string)null, product, new Validation() { ValidationName = "null Expected FAIL" }));
             results.Add(Log.assertEquals((string)null, (string)null, product, new Validation() { ValidationName = "both null PASS" }));
+            // test commits
             engine.WriteFile("output.txt", results);
         }
         [TestMethod]
