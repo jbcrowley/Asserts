@@ -1,4 +1,4 @@
-﻿using FileHelpers;
+using FileHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -17,23 +17,23 @@ namespace Asserts
         {
             FileHelperEngine<Result> engine = new FileHelperEngine<Result>();
             List<Result> results = new List<Result>();
-            Product product = new Product() { ProductId = "prod123_prd", ProductName = "ProductName" };
-            results.Add(new Result().addHeadings());
-            results.Add(Log.assertEquals("this", "that", product, new Validation() { ValidationName = "String FAIL", Comment = "Some comment" }));
-            results.Add(Log.assertEquals("this", "this", product, new Validation() { ValidationName = "String PASS", Comment = "Some comment" }));
-            results.Add(Log.assertEquals(1, 2, product, new Validation() { ValidationName = "int FAIL" }));
-            results.Add(Log.assertEquals(1, 1, product, new Validation() { ValidationName = "int PASS" }));
-            results.Add(Log.assertEquals(1, 2.5, product, new Validation() { ValidationName = "double FAIL" }));
-            results.Add(Log.assertEquals(2.0, 2.5, product, new Validation() { ValidationName = "double FAIL" }));
-            results.Add(Log.assertEquals(2.5, 2.5, product, new Validation() { ValidationName = "double PASS" }));
-            results.Add(Log.assertEquals(true, false, product, new Validation() { ValidationName = "bool FAIL" }));
-            results.Add(Log.assertEquals(true, true, product, new Validation() { ValidationName = "bool PASS" }));
-            results.Add(Log.assertTrue(true, product, new Validation() { ValidationName = "assertTrue PASS" }));
-            results.Add(Log.assertTrue(false, product, new Validation() { ValidationName = "assertTrue FAIL" }));
-            results.Add(Log.assertFalse(false, product, new Validation() { ValidationName = "assertFalse PASS" }));
-            results.Add(Log.assertFalse(true, product, new Validation() { ValidationName = "assertFalse FAIL" }));
-            results.Add(Log.assertEquals("test", (string)null, product, new Validation() { ValidationName = "null Expected FAIL" }));
-            results.Add(Log.assertEquals((string)null, (string)null, product, new Validation() { ValidationName = "both null PASS" }));
+            Product product = new Product("prod123_prd", "ProductName");
+            results.Add(new Result().AddHeadings());
+            results.Add(Log.AssertEquals("this", "that", product, "String FAIL", "Some comment"));
+            results.Add(Log.AssertEquals("this", "this", product, "String PASS", "Some comment"));
+            results.Add(Log.AssertEquals(1, 2, product, "int FAIL"));
+            results.Add(Log.AssertEquals(1, 1, product, "int PASS"));
+            results.Add(Log.AssertEquals(1, 2.5, product, "double FAIL"));
+            results.Add(Log.AssertEquals(2.0, 2.5, product, "double FAIL"));
+            results.Add(Log.AssertEquals(2.5, 2.5, product, "double PASS"));
+            results.Add(Log.AssertEquals(true, false, product, "bool FAIL"));
+            results.Add(Log.AssertEquals(true, true, product, "bool PASS"));
+            results.Add(Log.assertTrue(true, product, "assertTrue PASS"));
+            results.Add(Log.assertTrue(false, product, "assertTrue FAIL"));
+            results.Add(Log.AssertFalse(false, product, "assertFalse PASS"));
+            results.Add(Log.AssertFalse(true, product, "assertFalse FAIL"));
+            results.Add(Log.AssertEquals("test", (string)null, product, "null Expected FAIL"));
+            results.Add(Log.AssertEquals((string)null, (string)null, product, "both null PASS"));
             engine.WriteFile("output.txt", results);
         }
         [TestMethod]
@@ -59,7 +59,8 @@ namespace Asserts
         public string Actual;
         public string Expected;
         public string Comment;
-        public Result addHeadings()
+
+        public Result AddHeadings()
         {
             ProductId = "ProductID";
             ProductName = "Product Name";
@@ -68,6 +69,7 @@ namespace Asserts
             Actual = "Actual";
             Expected = "Expected";
             Comment = "Comment";
+
             return this;
         }
     }
@@ -75,6 +77,12 @@ namespace Asserts
     {
         public string ProductId;
         public string ProductName;
+
+        public Product(string productId, string productName)
+        {
+            ProductId = productId;
+            ProductName = productName;
+        }
     }
     class Validation
     {
@@ -86,9 +94,10 @@ namespace Asserts
     }
     static class Log
     {
-        static readonly string FAIL = "FAIL";
-        static readonly string PASS = "PASS";
-        static public Result assertEquals<T>(T actual, T expected, Product product, Validation validation)
+        static private readonly string FAIL = "FAIL";
+        static private readonly string PASS = "PASS";
+
+        static public Result AssertEquals<T>(T actual, T expected, Product product, string label, string comment = "")
         {
             string result = FAIL;
             if (actual == null & expected == null)
@@ -100,19 +109,22 @@ namespace Asserts
                 result = PASS;
             }
 
+            Validation validation = new Validation();
+            validation.ValidationName = label;
+            validation.Comment = comment;
             validation.Actual = actual == null ? string.Empty : actual.ToString();
             validation.Expected = expected == null ? string.Empty : expected.ToString();
             validation.Result = result;
 
             return WriteMessage(product, validation);
         }
-        static public Result assertTrue(bool actual, Product product, Validation validation)
+        static public Result assertTrue(bool actual, Product product, string label, string comment = "")
         {
-            return assertEquals(actual, true, product, validation);
+            return AssertEquals(actual, true, product, label, comment);
         }
-        static public Result assertFalse(bool actual, Product product, Validation validation)
+        static public Result AssertFalse(bool actual, Product product, string label, string comment = "")
         {
-            return assertEquals(actual, false, product, validation);
+            return AssertEquals(actual, false, product, label, comment);
         }
         static public Result WriteMessage(Product product, Validation validation)
         {
